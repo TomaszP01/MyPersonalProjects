@@ -1,10 +1,16 @@
 let runningTotal = 0;
-let buffer = "0";
 let previousOperator;
+let buffer = "0";
+const bufferMaxLength = 14;
+const typeMaxLength = 10;
 
 const screen = document.querySelector(".screen");
 
 function buttonClick(value) {
+	if (previousOperator === "=") {
+		buffer = "0";
+		previousOperator = null;
+	}
 	if (isNaN(value)) {
 		handleSymbol(value);
 	} else {
@@ -13,6 +19,10 @@ function buttonClick(value) {
 	screen.innerText = buffer;
 }
 function handleSymbol(symbol) {
+	if (buffer == previousOperator) {
+		buffer = symbol;
+		previousOperator = symbol;
+	}
 	switch (symbol) {
 		case "C":
 			buffer = "0";
@@ -23,9 +33,9 @@ function handleSymbol(symbol) {
 				return;
 			}
 			flushOperation(parseFloat(buffer));
-			previousOperator = null;
 			buffer = runningTotal;
 			runningTotal = 0;
+			previousOperator = "=";
 			break;
 		case "←":
 			if (buffer.length === 1) {
@@ -50,10 +60,9 @@ function handleSymbol(symbol) {
 	}
 }
 function handleMath(symbol) {
-	if (buffer === "0") {
+	if (isNaN(buffer)) {
 		return;
 	}
-
 	const floatBuffer = parseFloat(buffer);
 
 	if (runningTotal === 0) {
@@ -61,9 +70,8 @@ function handleMath(symbol) {
 	} else {
 		flushOperation(floatBuffer);
 	}
-
 	previousOperator = symbol;
-	buffer = "0";
+	buffer = previousOperator;
 }
 function flushOperation(floatBuffer) {
 	if (previousOperator === "+") {
@@ -77,6 +85,12 @@ function flushOperation(floatBuffer) {
 	}
 }
 function handleNumber(numberString) {
+	if (buffer == previousOperator) {
+		buffer = "0";
+	}
+	if (buffer.length >= typeMaxLength) {
+		return;
+	}
 	if (buffer === "0") {
 		buffer = numberString;
 	} else {
